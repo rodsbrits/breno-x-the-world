@@ -225,6 +225,7 @@
                     clearInterval(timerInterval);
                     gameActive = false;
                     board.style.opacity = '0.3';
+                    message.style.opacity = '0.3'; // Aplica transparência ao nome
                     finalScore.textContent = `Tempo esgotado! Pontuação Final: ${points}`;
                     gameOver.style.display = 'block';
                     restartButton.style.display = 'block';
@@ -247,6 +248,7 @@
             newGameButton.style.display = 'none';
             nextLevelButton.style.display = 'none';
             board.style.opacity = '1';
+            message.style.opacity = '1'; // Restaura opacidade do nome
             startGame();
         }
 

@@ -172,8 +172,8 @@
         const playerHeight = playerWidth * 1.5;
         let player = { x: canvas.width / 2 - playerWidth / 2, y: canvas.height - playerHeight - 10, width: playerWidth, height: playerHeight };
         let obstacles = [];
-        let gameSpeed = 2;
-        let spawnInterval = 4500;
+        let gameSpeed = 3; // Velocidade inicial aumentada para 3
+        let spawnInterval = 1400; // Reduzido para 1,4 segundos
         let points = 0;
         let gameActive = true;
         let obstaclesPassed = 0;
@@ -215,6 +215,7 @@
             restartButton.style.display = 'none';
             newGameButton.style.display = 'none';
             canvas.style.opacity = '1';
+            message.style.opacity = '1'; // Restaura opacidade do nome
             startGame();
         }
 
@@ -230,7 +231,7 @@
             );
 
             if (!canSpawnVertical) {
-                setTimeout(spawnObstacles, 100);
+                setTimeout(spawnObstacles, 200);
                 return;
             }
 
@@ -257,13 +258,16 @@
                 image: obstacleImages[Math.floor(Math.random() * 3)]
             };
             obstacles.push(obstacle);
-            const nextSpawn = Math.max(500, spawnInterval - points * 10);
+            const nextSpawn = Math.max(200, spawnInterval - Math.log(points + 1) * 50);
             setTimeout(spawnObstacles, nextSpawn);
         }
 
         function gameLoop() {
             if (!gameActive) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Aumenta a velocidade em 15% a cada 500 pontos
+            gameSpeed = 3 * (1 + Math.floor(points / 500) * 0.15);
 
             ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
 
@@ -289,6 +293,7 @@
                 ) {
                     gameActive = false;
                     canvas.style.opacity = '0.3';
+                    message.style.opacity = '0.3'; // Aplica transparência ao nome
                     finalScore.textContent = `Você perdeu! Pontuação Final: ${points}`;
                     gameOver.style.display = 'block';
                     restartButton.style.display = 'block';

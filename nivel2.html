@@ -176,7 +176,7 @@
         let ballY = canvas.height - 30;
         let ballDX = 3.4;
         let ballDY = -3.4;
-        const initialBallSpeed = 3.4;
+        const initialBallSpeed = 3.4; // Velocidade inicial constante
         const ballRadius = 10;
         const brickRowCount = 3;
         const brickColumnCount = 5;
@@ -212,6 +212,7 @@
             newGameButton.style.display = 'none';
             nextLevelButton.style.display = 'none';
             canvas.style.opacity = '1';
+            message.style.opacity = '1'; // Restaura opacidade do nome
             draw();
         }
 
@@ -288,12 +289,15 @@
                 if (ballX > paddleX && ballX < paddleX + paddleWidth) {
                     const hitPosition = (ballX - paddleX) / paddleWidth;
                     const maxAngle = 2;
-                    ballDX = maxAngle * (2 * hitPosition - 1);
-                    ballDY = -initialBallSpeed;
+                    const currentSpeed = Math.sqrt(ballDX * ballDX + ballDY * ballDY); // Magnitude da velocidade atual
+                    const angle = maxAngle * (2 * hitPosition - 1);
+                    ballDX = initialBallSpeed * Math.sin(angle); // Ajusta direção horizontal
+                    ballDY = -initialBallSpeed * Math.cos(angle); // Mantém velocidade inicial constante
                     ballHitSound.play();
                 } else {
                     gameActive = false;
                     canvas.style.opacity = '0.3';
+                    message.style.opacity = '0.3'; // Aplica transparência ao nome
                     finalScore.textContent = `Você perdeu! Pontuação Final: ${points}`;
                     gameOver.style.display = 'block';
                     restartButton.style.display = 'block';
@@ -316,6 +320,8 @@
                             brickBreakSound.play();
                             if (bricks.every(col => col.every(brick => brick.status === 0))) {
                                 gameActive = false;
+                                canvas.style.opacity = '0.3';
+                                message.style.opacity = '0.3'; // Aplica transparência ao nome
                                 finalScore.textContent = `Você venceu! Pontuação: ${points}`;
                                 gameOver.style.display = 'block';
                                 restartButton.style.display = 'block';
