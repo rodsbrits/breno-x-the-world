@@ -271,11 +271,11 @@
             fly.style.top = `${randomY}px`;
             fly.speed = 1 + (45 - timeLeft) / 45;
             fly.addEventListener('click', handleFlyClick);
-            if (isMobile) fly.addEventListener('touchstart', handleClick);
+            if (isMobile) fly.addEventListener('touchstart', handleFlyClick); // Corrigido para 'touchstart'
             flies.push(fly);
         }
 
-        function handleClick(e) {
+        function handleFlyClick(e) {
             e.preventDefault();
             if (!gameActive) return;
             const fly = e.target;
