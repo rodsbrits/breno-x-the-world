@@ -186,7 +186,7 @@
         let gameActive = true;
         let points = 100;
 
-        const brickColors = ['#ff4d4d', '#00ccff', '#ffcc00', '#cc00ff']; // Vermelho, Azul, Amarelo, Roxo
+        const brickColors = ['#ff4d4d', '#00ccff', '#ffcc00', '#cc00ff'];
 
         for (let c = 0; c < brickColumnCount; c++) {
             bricks[c] = [];
@@ -238,7 +238,7 @@
                         bricks[c][r].y = brickY;
                         ctx.beginPath();
                         ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                        ctx.fillStyle = bricks[c][r].color; // Cor aleatória
+                        ctx.fillStyle = bricks[c][r].color;
                         ctx.fill();
                         ctx.closePath();
                     }
@@ -292,7 +292,8 @@
 
         // Controles PC
         document.addEventListener('mousemove', (e) => {
-            const relativeX = e.clientX - canvas.offsetLeft;
+            const canvasRect = canvas.getBoundingClientRect();
+            const relativeX = e.clientX - canvasRect.left;
             if (relativeX > 0 && relativeX < canvas.width) {
                 paddleX = relativeX - paddleWidth / 2;
                 if (paddleX < 0) paddleX = 0;
@@ -303,8 +304,9 @@
         // Controles Mobile
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
+            const canvasRect = canvas.getBoundingClientRect();
             const touch = e.touches[0];
-            const relativeX = touch.clientX - canvas.offsetLeft;
+            const relativeX = touch.clientX - canvasRect.left;
             if (relativeX > 0 && relativeX < canvas.width) {
                 paddleX = relativeX - paddleWidth / 2;
                 if (paddleX < 0) paddleX = 0;
@@ -313,8 +315,9 @@
         });
         canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
+            const canvasRect = canvas.getBoundingClientRect();
             const touch = e.touches[0];
-            const relativeX = touch.clientX - canvas.offsetLeft;
+            const relativeX = touch.clientX - canvasRect.left;
             if (relativeX > 0 && relativeX < canvas.width) {
                 paddleX = relativeX - paddleWidth / 2;
                 if (paddleX < 0) paddleX = 0;
