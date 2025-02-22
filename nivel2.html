@@ -36,7 +36,7 @@
             background-color: #ffffff;
             border: 2px solid #333;
             width: 480px;
-            height: 320px;
+            height: 384px; /* Aumentado de 320px */
             transition: opacity 0.5s ease;
         }
         #game-canvas.mobile {
@@ -45,8 +45,8 @@
             border: 0.5vw solid #333;
             width: 90vw;
             max-width: 480px;
-            height: 60vw;
-            max-height: 320px;
+            height: 72vw; /* Aumentado de 60vw */
+            max-height: 384px;
             transition: opacity 0.5s ease;
         }
         #score-container.pc {
@@ -156,7 +156,7 @@
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = isMobile ? Math.min(window.innerWidth * 0.9, 480) : 480;
-        canvas.height = isMobile ? Math.min(window.innerHeight * 0.6, 320) : 320;
+        canvas.height = isMobile ? Math.min(window.innerHeight * 0.72, 384) : 384; // Ajustado para 20% maior
         const message = document.getElementById('message');
         const score = document.getElementById('score');
         const gameOver = document.getElementById('game-over');
@@ -172,8 +172,8 @@
         const paddleWidth = 75;
         let ballX = canvas.width / 2;
         let ballY = canvas.height - 30;
-        let ballDX = 2.8;
-        let ballDY = -2.8;
+        let ballDX = 3.4; // Aumentado de 2.8 para 3.4 (20%)
+        let ballDY = -3.4; // Aumentado de -2.8 para -3.4 (20%)
         const ballRadius = 10;
         const brickRowCount = 3;
         const brickColumnCount = 5;
@@ -184,9 +184,32 @@
         const brickOffsetLeft = 30;
         let bricks = [];
         let gameActive = true;
-        let points = parseInt(localStorage.getItem('level1Score')) || 100; // Carrega pontuação do nível 1 ou começa com 100
+        let points = 100; // Inicia zerado, sem carregar do nível anterior
 
         const brickColors = ['#ff4d4d', '#00ccff', '#ffcc00', '#cc00ff'];
+
+        function resetGame() {
+            paddleX = (canvas.width - 75) / 2;
+            ballX = canvas.width / 2;
+            ballY = canvas.height - 30;
+            ballDX = 3.4;
+            ballDY = -3.4;
+            bricks = [];
+            for (let c = 0; c < brickColumnCount; c++) {
+                bricks[c] = [];
+                for (let r = 0; r < brickRowCount; r++) {
+                    bricks[c][r] = { x: 0, y: 0, status: 1, color: brickColors[Math.floor(Math.random() * 4)] };
+                }
+            }
+            gameActive = true;
+            points = 100; // Reinicia a pontuação
+            score.textContent = `Pontuação: ${points}`;
+            gameOver.style.display = 'none';
+            restartButton.style.display = 'none';
+            nextLevelButton.style.display = 'none';
+            canvas.style.opacity = '1';
+            draw();
+        }
 
         for (let c = 0; c < brickColumnCount; c++) {
             bricks[c] = [];
@@ -195,7 +218,7 @@
             }
         }
 
-        score.textContent = `Pontuação: ${points}`; // Define a pontuação inicial
+        score.textContent = `Pontuação: ${points}`;
         message.style.display = 'block';
         setTimeout(() => {
             canvas.style.display = 'block';
@@ -266,7 +289,6 @@
                     ballHitSound.play();
                 } else {
                     gameActive = false;
-                    localStorage.setItem('level2Score', points); // Salva pontuação ao perder
                     canvas.style.opacity = '0.3';
                     gameOver.style.display = 'block';
                     finalScore.textContent = `Pontuação Final: ${points}`;
@@ -288,7 +310,6 @@
                             brickBreakSound.play();
                             if (bricks.every(col => col.every(brick => brick.status === 0))) {
                                 gameActive = false;
-                                localStorage.setItem('level2Score', points); // Salva pontuação ao vencer
                                 nextLevelButton.style.display = 'block';
                             }
                         }
@@ -332,9 +353,7 @@
 
         restartButton.addEventListener('click', () => {
             clickSound.play();
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 200);
+            resetGame(); // Reinicia o nível 2
         });
 
         nextLevelButton.addEventListener('click', () => {
@@ -348,9 +367,7 @@
             restartButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 clickSound.play();
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 200);
+                resetGame(); // Reinicia o nível 2
             });
             nextLevelButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();

@@ -192,13 +192,11 @@
         const finalScore = document.getElementById('final-score');
         const restartButton = document.getElementById('restart-button');
         const nextLevelButton = document.getElementById('next-level-button');
-        const tapSound = document.getElementById('tap-sound');
         let flies = [];
         let gameActive = true;
-        let points = parseInt(localStorage.getItem('level2Score')) || 0;
+        let points = 0; // Inicia zerado
         let timeLeft = 45;
 
-        // Função para tocar o som sem sobreposição
         function playTapSound() {
             const newTap = new Audio('Áudio/tap.wav');
             newTap.play();
@@ -224,13 +222,27 @@
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     gameActive = false;
-                    localStorage.setItem('level3Score', points);
                     board.style.opacity = '0.3';
                     gameOver.style.display = 'block';
                     finalScore.textContent = `Pontuação Final: ${points}`;
                     nextLevelButton.style.display = 'block';
                 }
             }, 1000);
+        }
+
+        function resetGame() {
+            flies.forEach(fly => board.removeChild(fly));
+            flies = [];
+            gameActive = true;
+            points = 0;
+            timeLeft = 45;
+            score.textContent = `Pontuação: ${points}`;
+            timer.textContent = `Tempo: ${timeLeft}s`;
+            gameOver.style.display = 'none';
+            restartButton.style.display = 'none';
+            nextLevelButton.style.display = 'none';
+            board.style.opacity = '1';
+            startGame();
         }
 
         function spawnFly() {
@@ -260,7 +272,7 @@
             flies = flies.filter(f => f !== fly);
             points += 20;
             score.textContent = `Pontuação: ${points}`;
-            playTapSound(); // Usa a função para sobreposição
+            playTapSound();
             spawnMoreFlies();
         }
 
@@ -294,9 +306,7 @@
 
         restartButton.addEventListener('click', () => {
             playTapSound();
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 200);
+            resetGame(); // Reinicia o nível 3
         });
 
         nextLevelButton.addEventListener('click', () => {
@@ -310,9 +320,7 @@
             restartButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 playTapSound();
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 200);
+                resetGame(); // Reinicia o nível 3
             });
             nextLevelButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();

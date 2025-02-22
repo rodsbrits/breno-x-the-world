@@ -42,7 +42,7 @@
         }
         #game-canvas.mobile {
             display: none;
-            width: 100vw; /* Largura total do dispositivo */
+            width: 50vw; /* Limitado a 50% da tela */
             height: 60vh; /* 60% da altura para deixar 20%+ livre */
             background-color: #ffffff;
             border: 0.5vw solid #333;
@@ -156,8 +156,8 @@
 
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = isMobile ? window.innerWidth : 300; // Largura total no mobile
-        canvas.height = isMobile ? window.innerHeight * 0.6 : 600; // 60% da altura no mobile
+        canvas.width = isMobile ? window.innerWidth * 0.5 : 300; // 50% da largura no mobile
+        canvas.height = isMobile ? window.innerHeight * 0.6 : 600;
         const message = document.getElementById('message');
         const score = document.getElementById('score');
         const gameOver = document.getElementById('game-over');
@@ -172,7 +172,7 @@
         let obstacles = [];
         let gameSpeed = 2;
         let spawnInterval = 4500;
-        let points = parseInt(localStorage.getItem('level3Score')) || 0;
+        let points = 0; // Inicia zerado
         let gameActive = true;
         let obstaclesPassed = 0;
 
@@ -202,19 +202,32 @@
             spawnObstacles();
         }
 
+        function resetGame() {
+            obstacles = [];
+            player.x = canvas.width / 2 - playerWidth / 2;
+            gameActive = true;
+            points = 0;
+            obstaclesPassed = 0;
+            score.textContent = `Pontuação: ${points}`;
+            gameOver.style.display = 'none';
+            restartButton.style.display = 'none';
+            canvas.style.opacity = '1';
+            startGame();
+        }
+
         function spawnObstacles() {
             if (!gameActive) return;
             const obstacleWidth = playerWidth;
             const obstacleHeight = playerHeight;
-            const minGap = playerHeight * 1.1; // Espaço mínimo + 10%
+            const minGap = playerHeight * 1.1; // 110% da altura do personagem
 
-            // Verifica se há espaço suficiente para o personagem passar
+            // Verifica se há espaço suficiente entre obstáculos
             const canSpawn = obstacles.every(obstacle => 
                 obstacle.y + obstacle.height + minGap < canvas.height || obstacle.y > canvas.height
             );
 
             if (!canSpawn) {
-                setTimeout(spawnObstacles, 100); // Tenta novamente em 100ms
+                setTimeout(spawnObstacles, 100);
                 return;
             }
 
@@ -315,18 +328,14 @@
 
         restartButton.addEventListener('click', () => {
             jumpSound.play();
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 200);
+            resetGame(); // Reinicia o nível 4
         });
 
         if (isMobile) {
             restartButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 jumpSound.play();
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 200);
+                resetGame(); // Reinicia o nível 4
             });
         }
     </script>
