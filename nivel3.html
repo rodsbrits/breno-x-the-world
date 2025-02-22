@@ -174,7 +174,7 @@
         <button id="restart-button" class="device">Jogar Novamente</button>
     </div>
     <button id="next-level-button" class="device">Nível 4</button>
-    <audio id="tap-sound" src="Áudio/tap.wav"></audio>
+    <audio id="tap-sound" src="Áudio/tap.wav" preload="auto"></audio>
 
     <script>
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
@@ -195,12 +195,18 @@
         const tapSound = document.getElementById('tap-sound');
         let flies = [];
         let gameActive = true;
-        let points = parseInt(localStorage.getItem('level2Score')) || 0; // Carrega pontuação do nível 2
+        let points = parseInt(localStorage.getItem('level2Score')) || 0;
         let timeLeft = 45;
+
+        // Função para tocar o som sem sobreposição
+        function playTapSound() {
+            const newTap = new Audio('Áudio/tap.wav');
+            newTap.play();
+        }
 
         if (isMobile) document.body.style.touchAction = 'none';
 
-        score.textContent = `Pontuação: ${points}`; // Define a pontuação inicial
+        score.textContent = `Pontuação: ${points}`;
         message.style.display = 'block';
         setTimeout(() => {
             board.style.display = 'block';
@@ -218,7 +224,7 @@
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     gameActive = false;
-                    localStorage.setItem('level3Score', points); // Salva pontuação ao finalizar
+                    localStorage.setItem('level3Score', points);
                     board.style.opacity = '0.3';
                     gameOver.style.display = 'block';
                     finalScore.textContent = `Pontuação Final: ${points}`;
@@ -254,7 +260,7 @@
             flies = flies.filter(f => f !== fly);
             points += 20;
             score.textContent = `Pontuação: ${points}`;
-            tapSound.play();
+            playTapSound(); // Usa a função para sobreposição
             spawnMoreFlies();
         }
 
@@ -287,14 +293,14 @@
         }
 
         restartButton.addEventListener('click', () => {
-            tapSound.play();
+            playTapSound();
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 200);
         });
 
         nextLevelButton.addEventListener('click', () => {
-            tapSound.play();
+            playTapSound();
             setTimeout(() => {
                 window.location.href = 'nivel4.html';
             }, 200);
@@ -303,14 +309,14 @@
         if (isMobile) {
             restartButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                tapSound.play();
+                playTapSound();
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 200);
             });
             nextLevelButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                tapSound.play();
+                playTapSound();
                 setTimeout(() => {
                     window.location.href = 'nivel4.html';
                 }, 200);
