@@ -172,8 +172,8 @@
         const paddleWidth = 75;
         let ballX = canvas.width / 2;
         let ballY = canvas.height - 30;
-        let ballDX = 2.8; // Aumentado de 2.3 para 2.8 (20%)
-        let ballDY = -2.8; // Aumentado de -2.3 para -2.8 (20%)
+        let ballDX = 2.8;
+        let ballDY = -2.8;
         const ballRadius = 10;
         const brickRowCount = 3;
         const brickColumnCount = 5;
@@ -184,7 +184,7 @@
         const brickOffsetLeft = 30;
         let bricks = [];
         let gameActive = true;
-        let points = 100;
+        let points = parseInt(localStorage.getItem('level1Score')) || 100; // Carrega pontuação do nível 1 ou começa com 100
 
         const brickColors = ['#ff4d4d', '#00ccff', '#ffcc00', '#cc00ff'];
 
@@ -195,6 +195,7 @@
             }
         }
 
+        score.textContent = `Pontuação: ${points}`; // Define a pontuação inicial
         message.style.display = 'block';
         setTimeout(() => {
             canvas.style.display = 'block';
@@ -265,6 +266,7 @@
                     ballHitSound.play();
                 } else {
                     gameActive = false;
+                    localStorage.setItem('level2Score', points); // Salva pontuação ao perder
                     canvas.style.opacity = '0.3';
                     gameOver.style.display = 'block';
                     finalScore.textContent = `Pontuação Final: ${points}`;
@@ -286,6 +288,7 @@
                             brickBreakSound.play();
                             if (bricks.every(col => col.every(brick => brick.status === 0))) {
                                 gameActive = false;
+                                localStorage.setItem('level2Score', points); // Salva pontuação ao vencer
                                 nextLevelButton.style.display = 'block';
                             }
                         }

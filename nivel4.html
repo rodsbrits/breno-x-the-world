@@ -42,10 +42,8 @@
         }
         #game-canvas.mobile {
             display: none;
-            width: 33vw;
-            max-width: 300px;
-            height: 80vh;
-            max-height: 600px;
+            width: 33vw; /* Ajusta à largura do dispositivo */
+            height: 80vh; /* Ajusta à altura do dispositivo */
             background-color: #ffffff;
             border: 0.5vw solid #333;
             transition: opacity 0.5s ease;
@@ -158,8 +156,8 @@
 
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = isMobile ? Math.min(window.innerWidth * 0.33, 300) : 300;
-        canvas.height = isMobile ? Math.min(window.innerHeight * 0.8, 600) : 600;
+        canvas.width = isMobile ? window.innerWidth * 0.33 : 300; // Ajusta dinamicamente sem limite máximo
+        canvas.height = isMobile ? window.innerHeight * 0.8 : 600; // Ajusta dinamicamente sem limite máximo
         const message = document.getElementById('message');
         const score = document.getElementById('score');
         const gameOver = document.getElementById('game-over');
@@ -173,10 +171,10 @@
         let player = { x: canvas.width / 2 - playerWidth / 2, y: canvas.height - playerHeight - 10, width: playerWidth, height: playerHeight };
         let obstacles = [];
         let gameSpeed = 2;
-        let spawnInterval = 4500; // Aumentado de 3000ms para 4500ms (50% menos frequente)
-        let points = 0;
+        let spawnInterval = 4500;
+        let points = parseInt(localStorage.getItem('level3Score')) || 0; // Carrega pontuação do nível 3
         let gameActive = true;
-        let obstaclesPassed = 0; // Contador de obstáculos ultrapassados
+        let obstaclesPassed = 0;
 
         const playerImage = new Image();
         playerImage.src = 'Imagens/carroBreno.png';
@@ -189,6 +187,7 @@
 
         if (isMobile) document.body.style.touchAction = 'none';
 
+        score.textContent = `Pontuação: ${points}`; // Define a pontuação inicial
         message.style.display = 'block';
         Promise.all([playerImage, ...obstacleImages].map(img => new Promise(resolve => img.onload = resolve))).then(() => {
             setTimeout(() => {
@@ -214,7 +213,7 @@
                 overlap = obstacles.some(obstacle =>
                     newX < obstacle.x + obstacle.width &&
                     newX + obstacleWidth > obstacle.x &&
-                    obstacle.y < obstacleHeight // Verifica apenas obstáculos na parte superior
+                    obstacle.y < obstacleHeight
                 );
             } while (overlap);
 

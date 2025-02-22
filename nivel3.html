@@ -195,11 +195,12 @@
         const tapSound = document.getElementById('tap-sound');
         let flies = [];
         let gameActive = true;
-        let points = 0;
+        let points = parseInt(localStorage.getItem('level2Score')) || 0; // Carrega pontuação do nível 2
         let timeLeft = 45;
 
         if (isMobile) document.body.style.touchAction = 'none';
 
+        score.textContent = `Pontuação: ${points}`; // Define a pontuação inicial
         message.style.display = 'block';
         setTimeout(() => {
             board.style.display = 'block';
@@ -207,8 +208,8 @@
         }, 2000);
 
         function startGame() {
-            spawnFly(); // Primeira mosca
-            spawnFly(); // Segunda mosca
+            spawnFly();
+            spawnFly();
             setInterval(moveFlies, 100);
             const timerInterval = setInterval(() => {
                 timeLeft--;
@@ -217,6 +218,7 @@
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     gameActive = false;
+                    localStorage.setItem('level3Score', points); // Salva pontuação ao finalizar
                     board.style.opacity = '0.3';
                     gameOver.style.display = 'block';
                     finalScore.textContent = `Pontuação Final: ${points}`;
@@ -253,16 +255,16 @@
             points += 20;
             score.textContent = `Pontuação: ${points}`;
             tapSound.play();
-            spawnMoreFlies(); // Garante o mínimo após matar uma mosca
+            spawnMoreFlies();
         }
 
         function spawnMoreFlies() {
             if (!gameActive) return;
             let minFlies;
-            if (timeLeft > 35) minFlies = 2;      // 0-10s: mínimo 2
-            else if (timeLeft > 20) minFlies = 3; // 10-25s: mínimo 3
-            else if (timeLeft > 10) minFlies = 4; // 25-35s: mínimo 4
-            else minFlies = 5;                    // 35-45s: mínimo 5
+            if (timeLeft > 35) minFlies = 2;
+            else if (timeLeft > 20) minFlies = 3;
+            else if (timeLeft > 10) minFlies = 4;
+            else minFlies = 5;
 
             while (flies.length < minFlies) {
                 spawnFly();
