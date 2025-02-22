@@ -23,13 +23,13 @@
             font-size: 24px;
             color: #ffffff;
             margin-top: 20px;
-            display: none;
+            transition: opacity 0.5s ease;
         }
         #message.mobile {
             font-size: 5vw;
             color: #ffffff;
             margin-top: 2vh;
-            display: none;
+            transition: opacity 0.5s ease;
         }
         #game-canvas.pc {
             display: none;
@@ -107,6 +107,8 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin-left: auto;
+            margin-right: auto;
         }
         #restart-button.mobile, #new-game-button.mobile, #next-level-button.mobile {
             display: none;
@@ -120,6 +122,8 @@
             border-radius: 1vw;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin-left: auto;
+            margin-right: auto;
         }
         #restart-button:hover, #new-game-button:hover, #next-level-button:hover {
             background-color: #ff6666;
@@ -176,7 +180,7 @@
         let ballY = canvas.height - 30;
         let ballDX = 3.4;
         let ballDY = -3.4;
-        const initialBallSpeed = 3.4; // Velocidade inicial constante
+        const initialBallSpeed = 3.4;
         const ballRadius = 10;
         const brickRowCount = 3;
         const brickColumnCount = 5;
@@ -289,10 +293,10 @@
                 if (ballX > paddleX && ballX < paddleX + paddleWidth) {
                     const hitPosition = (ballX - paddleX) / paddleWidth;
                     const maxAngle = 2;
-                    const currentSpeed = Math.sqrt(ballDX * ballDX + ballDY * ballDY); // Magnitude da velocidade atual
+                    const currentSpeed = Math.sqrt(ballDX * ballDX + ballDY * ballDY);
                     const angle = maxAngle * (2 * hitPosition - 1);
-                    ballDX = initialBallSpeed * Math.sin(angle); // Ajusta direção horizontal
-                    ballDY = -initialBallSpeed * Math.cos(angle); // Mantém velocidade inicial constante
+                    ballDX = initialBallSpeed * Math.sin(angle);
+                    ballDY = -initialBallSpeed * Math.cos(angle);
                     ballHitSound.play();
                 } else {
                     gameActive = false;

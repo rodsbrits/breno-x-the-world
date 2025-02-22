@@ -24,13 +24,13 @@
             font-size: 24px;
             color: #ffffff;
             margin-top: 20px;
-            display: none;
+            transition: opacity 0.5s ease;
         }
         #message.mobile {
             font-size: 5vw;
             color: #ffffff;
             margin-top: 2vh;
-            display: none;
+            transition: opacity 0.5s ease;
         }
         #board.pc {
             display: none;
@@ -139,6 +139,8 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin-left: auto;
+            margin-right: auto;
         }
         #restart-button.mobile, #new-game-button.mobile, #next-level-button.mobile {
             display: none;
@@ -152,6 +154,8 @@
             border-radius: 1vw;
             cursor: pointer;
             transition: background-color 0.3s ease;
+            margin-left: auto;
+            margin-right: auto;
         }
         #restart-button:hover, #new-game-button:hover, #next-level-button:hover {
             background-color: #ff6666;
@@ -267,11 +271,11 @@
             fly.style.top = `${randomY}px`;
             fly.speed = 1 + (45 - timeLeft) / 45;
             fly.addEventListener('click', handleFlyClick);
-            if (isMobile) fly.addEventListener('touchstart', handleFlyClick);
+            if (isMobile) fly.addEventListener('touchstart', handleClick);
             flies.push(fly);
         }
 
-        function handleFlyClick(e) {
+        function handleClick(e) {
             e.preventDefault();
             if (!gameActive) return;
             const fly = e.target;
