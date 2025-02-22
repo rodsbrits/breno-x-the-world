@@ -178,16 +178,19 @@
         if (isMobile) document.body.style.touchAction = 'none';
 
         message.style.display = 'block';
-        setTimeout(() => {
-            canvas.style.display = 'block';
-            gameLoop();
-        }, 2000);
+        playerImage.onload = () => { // Espera o GIF carregar
+            setTimeout(() => {
+                canvas.style.display = 'block';
+                message.style.display = 'none';
+                gameLoop();
+            }, 2000);
+        };
 
         function spawnObstacle() {
             if (!gameActive) return;
             const obstacle = {
                 x: canvas.width,
-                y: canvas.height - 20, // Apenas barras inferiores
+                y: canvas.height - 20,
                 width: 20,
                 height: 20,
                 type: 'jump'
@@ -236,7 +239,7 @@
             points++;
             score.textContent = `Pontuação: ${points}`;
             gameSpeed += 0.005;
-            if (points % 90 === 0) spawnObstacle(); // Frequência aumentada em 10% (de 100 para 90)
+            if (points % 90 === 0) spawnObstacle();
 
             requestAnimationFrame(gameLoop);
         }

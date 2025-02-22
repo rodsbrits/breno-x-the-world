@@ -39,6 +39,7 @@
             height: 310px;
             background-color: #ffffff;
             border: 2px solid #333;
+            transition: opacity 0.5s ease;
         }
         #board.mobile {
             display: none;
@@ -48,6 +49,7 @@
             aspect-ratio: 1 / 1;
             background-color: #ffffff;
             border: 0.5vw solid #333;
+            transition: opacity 0.5s ease;
         }
         .fly.pc {
             position: absolute;
@@ -105,6 +107,26 @@
             font-size: 4vw;
             color: #ff4d4d;
         }
+        #game-over.pc {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #ffcc00;
+            font-size: 30px;
+        }
+        #game-over.mobile {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #ffcc00;
+            font-size: 7vw;
+        }
         #restart-button.pc, #next-level-button.pc {
             display: none;
             margin-top: 20px;
@@ -147,7 +169,10 @@
         <h2 id="message" class="device">Breno's Fly Invasion!</h2>
     </div>
     <div id="board" class="device"></div>
-    <button id="restart-button" class="device">Jogar Novamente</button>
+    <div id="game-over" class="device">
+        <div id="final-score"></div>
+        <button id="restart-button" class="device">Jogar Novamente</button>
+    </div>
     <button id="next-level-button" class="device">Nível 4</button>
     <audio id="tap-sound" src="Áudio/tap.wav"></audio>
 
@@ -163,6 +188,8 @@
         const board = document.getElementById('board');
         const score = document.getElementById('score');
         const timer = document.getElementById('timer');
+        const gameOver = document.getElementById('game-over');
+        const finalScore = document.getElementById('final-score');
         const restartButton = document.getElementById('restart-button');
         const nextLevelButton = document.getElementById('next-level-button');
         const tapSound = document.getElementById('tap-sound');
@@ -180,7 +207,8 @@
         }, 2000);
 
         function startGame() {
-            spawnFly();
+            spawnFly(); // Primeira mosca
+            spawnFly(); // Segunda mosca
             setInterval(moveFlies, 100);
             const timerInterval = setInterval(() => {
                 timeLeft--;
@@ -189,7 +217,9 @@
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     gameActive = false;
-                    alert(`Fim do jogo! Pontuação final: ${points}`);
+                    board.style.opacity = '0.3';
+                    gameOver.style.display = 'block';
+                    finalScore.textContent = `Pontuação Final: ${points}`;
                     nextLevelButton.style.display = 'block';
                 }
             }, 1000);
@@ -204,9 +234,8 @@
             const boardWidth = board.offsetWidth;
             const flyWidth = fly.offsetWidth;
             const flyHeight = fly.offsetHeight;
-            // Posição aleatória dentro do tabuleiro
             const randomX = Math.random() * (boardWidth - flyWidth);
-            const randomY = Math.random() * (boardWidth - flyHeight); // boardWidth pois é quadrado
+            const randomY = Math.random() * (boardWidth - flyHeight);
             fly.style.left = `${randomX}px`;
             fly.style.top = `${randomY}px`;
             fly.speed = 1 + (45 - timeLeft) / 45;
@@ -249,19 +278,9 @@
         restartButton.addEventListener('click', () => {
             tapSound.play();
             setTimeout(() => {
-                window.location.href = 'nivel1.html';
+                window.location.href = 'index.html';
             }, 200);
         });
-
-        if (isMobile) {
-            restartButton.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                tapSound.play();
-                setTimeout(() => {
-                    window.location.href = 'nivel1.html';
-                }, 200);
-            });
-        }
 
         nextLevelButton.addEventListener('click', () => {
             tapSound.play();
@@ -271,6 +290,13 @@
         });
 
         if (isMobile) {
+            restartButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                tapSound.play();
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 200);
+            });
             nextLevelButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 tapSound.play();

@@ -31,6 +31,28 @@
             margin-top: 2vh;
             display: none;
         }
+        #start-button.pc {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            background-color: #ff4d4d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #start-button.mobile {
+            margin-top: 2vh;
+            padding: 2vw 4vw;
+            font-size: 4vw;
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            background-color: #ff4d4d;
+            border: none;
+            border-radius: 1vw;
+            cursor: pointer;
+        }
         #board.pc {
             display: none;
             grid-template-columns: repeat(3, 100px);
@@ -166,6 +188,7 @@
     </div>
     <div id="intro">
         <h2 id="message" class="device">Are you ready to lose?</h2>
+        <button id="start-button" class="device">Iniciar</button>
     </div>
     <div id="board" class="device"></div>
     <div id="game-over" class="device">
@@ -185,6 +208,7 @@
         });
 
         const message = document.getElementById('message');
+        const startButton = document.getElementById('start-button');
         const board = document.getElementById('board');
         const score = document.getElementById('score');
         const gameOver = document.getElementById('game-over');
@@ -201,10 +225,23 @@
         if (isMobile) document.body.style.touchAction = 'none';
 
         message.style.display = 'block';
-        brenoVoice.play();
-        setTimeout(() => {
+        startButton.style.display = 'block';
+
+        startButton.addEventListener('click', () => {
+            brenoVoice.play();
+            startButton.style.display = 'none';
+            message.style.display = 'none';
             board.style.display = 'grid';
-        }, 2000);
+        });
+        if (isMobile) {
+            startButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                brenoVoice.play();
+                startButton.style.display = 'none';
+                message.style.display = 'none';
+                board.style.display = 'grid';
+            });
+        }
 
         for (let i = 0; i < 9; i++) {
             const cell = document.createElement('div');
