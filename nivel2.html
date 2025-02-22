@@ -155,8 +155,8 @@
 
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = isMobile ? canvas.offsetWidth : 480;
-        canvas.height = isMobile ? canvas.offsetHeight : 320;
+        canvas.width = isMobile ? Math.min(window.innerWidth * 0.9, 480) : 480;
+        canvas.height = isMobile ? Math.min(window.innerHeight * 0.6, 320) : 320;
         const message = document.getElementById('message');
         const score = document.getElementById('score');
         const gameOver = document.getElementById('game-over');
@@ -172,12 +172,12 @@
         const paddleWidth = 75;
         let ballX = canvas.width / 2;
         let ballY = canvas.height - 30;
-        let ballDX = 2.3;
-        let ballDY = -2.3;
+        let ballDX = 2.8; // Aumentado de 2.3 para 2.8 (20%)
+        let ballDY = -2.8; // Aumentado de -2.3 para -2.8 (20%)
         const ballRadius = 10;
         const brickRowCount = 3;
         const brickColumnCount = 5;
-        const brickWidth = 75;
+        const brickWidth = canvas.width / brickColumnCount - 15;
         const brickHeight = 20;
         const brickPadding = 10;
         const brickOffsetTop = 30;
@@ -198,6 +198,7 @@
         message.style.display = 'block';
         setTimeout(() => {
             canvas.style.display = 'block';
+            message.style.display = 'block';
             draw();
         }, 2000);
 
@@ -257,7 +258,10 @@
                 ballDY = -ballDY;
             } else if (ballY + ballDY > canvas.height - ballRadius) {
                 if (ballX > paddleX && ballX < paddleX + paddleWidth) {
-                    ballDY = -ballDY;
+                    const hitPosition = (ballX - paddleX) / paddleWidth;
+                    const maxAngle = 2;
+                    ballDX = maxAngle * (2 * hitPosition - 1);
+                    ballDY = -Math.abs(ballDY);
                     ballHitSound.play();
                 } else {
                     gameActive = false;
@@ -290,7 +294,6 @@
             }
         }
 
-        // Controles PC
         document.addEventListener('mousemove', (e) => {
             const canvasRect = canvas.getBoundingClientRect();
             const relativeX = e.clientX - canvasRect.left;
@@ -301,7 +304,6 @@
             }
         });
 
-        // Controles Mobile
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const canvasRect = canvas.getBoundingClientRect();

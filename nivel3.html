@@ -226,7 +226,7 @@
         }
 
         function spawnFly() {
-            if (!gameActive || flies.length >= 4) return;
+            if (!gameActive) return;
             const fly = document.createElement('img');
             fly.src = 'Imagens/mosca.png';
             fly.classList.add('fly', deviceClass);
@@ -253,11 +253,20 @@
             points += 20;
             score.textContent = `Pontuação: ${points}`;
             tapSound.play();
+            spawnMoreFlies(); // Garante o mínimo após matar uma mosca
         }
 
         function spawnMoreFlies() {
-            const maxFlies = Math.min(4, Math.floor((45 - timeLeft) / 15) + 1);
-            if (flies.length < maxFlies) spawnFly();
+            if (!gameActive) return;
+            let minFlies;
+            if (timeLeft > 35) minFlies = 2;      // 0-10s: mínimo 2
+            else if (timeLeft > 20) minFlies = 3; // 10-25s: mínimo 3
+            else if (timeLeft > 10) minFlies = 4; // 25-35s: mínimo 4
+            else minFlies = 5;                    // 35-45s: mínimo 5
+
+            while (flies.length < minFlies) {
+                spawnFly();
+            }
         }
 
         function moveFlies() {

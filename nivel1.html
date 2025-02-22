@@ -31,28 +31,6 @@
             margin-top: 2vh;
             display: none;
         }
-        #start-button.pc {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 18px;
-            font-family: 'Orbitron', sans-serif;
-            color: #ffffff;
-            background-color: #ff4d4d;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #start-button.mobile {
-            margin-top: 2vh;
-            padding: 2vw 4vw;
-            font-size: 4vw;
-            font-family: 'Orbitron', sans-serif;
-            color: #ffffff;
-            background-color: #ff4d4d;
-            border: none;
-            border-radius: 1vw;
-            cursor: pointer;
-        }
         #board.pc {
             display: none;
             grid-template-columns: repeat(3, 100px);
@@ -187,8 +165,7 @@
         <div id="score" class="device">Pontuação: 0</div>
     </div>
     <div id="intro">
-        <h2 id="message" class="device">Are you ready to lose?</h2>
-        <button id="start-button" class="device">Iniciar</button>
+        <h2 id="message" class="device">Tic Tac Breno</h2>
     </div>
     <div id="board" class="device"></div>
     <div id="game-over" class="device">
@@ -196,7 +173,6 @@
         <button id="restart-button" class="device">Jogar Novamente</button>
     </div>
     <button id="next-level-button" class="device">Nível 2</button>
-    <audio id="breno-voice" src="Áudio/Are_you_ready_to_lose.mp3"></audio>
     <audio id="click-sound" src="Áudio/Click.wav"></audio>
 
     <script>
@@ -208,14 +184,12 @@
         });
 
         const message = document.getElementById('message');
-        const startButton = document.getElementById('start-button');
         const board = document.getElementById('board');
         const score = document.getElementById('score');
         const gameOver = document.getElementById('game-over');
         const finalScore = document.getElementById('final-score');
         const restartButton = document.getElementById('restart-button');
         const nextLevelButton = document.getElementById('next-level-button');
-        const brenoVoice = document.getElementById('breno-voice');
         const clickSound = document.getElementById('click-sound');
         let cells = [];
         let currentPlayer = 'X';
@@ -224,24 +198,12 @@
 
         if (isMobile) document.body.style.touchAction = 'none';
 
+        // Exibe a mensagem por 2 segundos antes do tabuleiro
         message.style.display = 'block';
-        startButton.style.display = 'block';
-
-        startButton.addEventListener('click', () => {
-            brenoVoice.play();
-            startButton.style.display = 'none';
-            message.style.display = 'none';
+        setTimeout(() => {
+            message.style.display = 'block'; // Mantém visível acima do tabuleiro
             board.style.display = 'grid';
-        });
-        if (isMobile) {
-            startButton.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                brenoVoice.play();
-                startButton.style.display = 'none';
-                message.style.display = 'none';
-                board.style.display = 'grid';
-            });
-        }
+        }, 2000);
 
         for (let i = 0; i < 9; i++) {
             const cell = document.createElement('div');
