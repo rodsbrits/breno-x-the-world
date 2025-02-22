@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breno x the World - Nível 4</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            height: 100vh;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #intro {
+            text-align: center;
+        }
+        #message.pc {
+            font-size: 24px;
+            color: #ffffff;
+            margin-top: 20px;
+            display: none;
+        }
+        #message.mobile {
+            font-size: 5vw;
+            color: #ffffff;
+            margin-top: 2vh;
+            display: none;
+        }
+        #game-canvas.pc {
+            display: none;
+            width: 600px;
+            height: 200px;
+            background-color: #ffffff;
+            border: 2px solid #333;
+            transition: opacity 0.5s ease;
+        }
+        #game-canvas.mobile {
+            display: none;
+            width: 90vw;
+            max-width: 600px;
+            height: 33vw;
+            max-height: 200px;
+            background-color: #ffffff;
+            border: 0.5vw solid #333;
+            transition: opacity 0.5s ease;
+        }
+        #score-container.pc {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ffcc00;
+        }
+        #score-container.mobile {
+            position: absolute;
+            top: 2vh;
+            left: 2vw;
+            color: #ffcc00;
+        }
+        #level-title.pc {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        #level-title.mobile {
+            font-size: 5vw;
+            margin-bottom: 1vh;
+        }
+        #score.pc {
+            font-size: 20px;
+        }
+        #score.mobile {
+            font-size: 4vw;
+        }
+        #game-over.pc {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #ffcc00;
+            font-size: 30px;
+        }
+        #game-over.mobile {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #ffcc00;
+            font-size: 7vw;
+        }
+        #restart-button.pc {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            background-color: #ff4d4d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #restart-button.mobile {
+            margin-top: 2vh;
+            padding: 2vw 4vw;
+            font-size: 4vw;
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            background-color: #ff4d4d;
+            border: none;
+            border-radius: 1vw;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #restart-button:hover {
+            background-color: #ff6666;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="score-container" class="device">
+        <div id="level-title" class="device">Nível 4</div>
+        <div id="score" class="device">Pontuação: 0</div>
+    </div>
+    <div id="intro">
+        <h2 id="message" class="device">Escape from Breno!</h2>
+    </div>
+    <canvas id="game-canvas" class="device"></canvas>
+    <div id="game-over" class="device">
+        <div id="final-score"></div>
+        <button id="restart-button" class="device">Jogar Novamente</button>
+    </div>
+    <audio id="jump-sound" src="Áudio/jump.wav"></audio>
+
+    <script>
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        const deviceClass = isMobile ? 'mobile' : 'pc';
+
+        document.querySelectorAll('.device').forEach(element => {
+            element.classList.add(deviceClass);
+        });
+
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = isMobile ? canvas.offsetWidth : 600;
+        canvas.height = isMobile ? canvas.offsetHeight : 200;
+        const message = document.getElementById('message');
+        const score = document.getElementById('score');
+        const gameOver = document.getElementById('game-over');
+        const finalScore = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart-button');
+        const jumpSound = document.getElementById('jump-sound');
+
+        let player = { x: 50, y: canvas.height - 60, width: 50, height: 50, dy: 0, jumping: false };
+        let obstacles = [];
+        let gameSpeed = 2;
+        let points = 0;
+        let gameActive = true;
+
+        const playerImage = new Image();
+        playerImage.src = 'Imagens/runner.gif';
+
+        if (isMobile) document.body.style.touchAction = 'none';
+
+        message.style.display = 'block';
+        setTimeout(() => {
+            canvas.style.display = 'block';
+            gameLoop();
+        }, 2000);
+
+        function spawnObstacle() {
+            if (!gameActive) return;
+            const obstacle = {
+                x: canvas.width,
+                y: canvas.height - 20, // Apenas barras inferiores
+                width: 20,
+                height: 20,
+                type: 'jump'
+            };
+            obstacles.push(obstacle);
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (player.jumping) {
+                player.y += player.dy;
+                player.dy += 0.5;
+                if (player.y >= canvas.height - player.height) {
+                    player.y = canvas.height - player.height;
+                    player.jumping = false;
+                    player.dy = 0;
+                }
+            }
+
+            ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
+
+            obstacles.forEach((obstacle, index) => {
+                obstacle.x -= gameSpeed;
+                if (obstacle.x + obstacle.width < 0) obstacles.splice(index, 1);
+                ctx.fillStyle = '#ff4d4d';
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+
+            obstacles.forEach(obstacle => {
+                if (
+                    player.x < obstacle.x + obstacle.width &&
+                    player.x + player.width > obstacle.x &&
+                    player.y < obstacle.y + obstacle.height &&
+                    player.y + player.height > obstacle.y
+                ) {
+                    gameActive = false;
+                    canvas.style.opacity = '0.3';
+                    gameOver.style.display = 'block';
+                    finalScore.textContent = `Pontuação Final: ${points}`;
+                    restartButton.style.display = 'block';
+                }
+            });
+
+            points++;
+            score.textContent = `Pontuação: ${points}`;
+            gameSpeed += 0.005;
+            if (points % 90 === 0) spawnObstacle(); // Frequência aumentada em 10% (de 100 para 90)
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !player.jumping && gameActive) {
+                player.jumping = true;
+                player.dy = -10;
+                jumpSound.play();
+            }
+        });
+
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!player.jumping && gameActive) {
+                player.jumping = true;
+                player.dy = -10;
+                jumpSound.play();
+            }
+        });
+
+        restartButton.addEventListener('click', () => {
+            jumpSound.play();
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 200);
+        });
+
+        if (isMobile) {
+            restartButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                jumpSound.play();
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 200);
+            });
+        }
+    </script>
+</body>
+</html>

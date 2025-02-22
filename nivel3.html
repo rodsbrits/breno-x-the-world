@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breno x the World - Nível 3</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            height: 100vh;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #intro {
+            text-align: center;
+        }
+        #message.pc {
+            font-size: 24px;
+            color: #ffffff;
+            margin-top: 20px;
+            display: none;
+        }
+        #message.mobile {
+            font-size: 5vw;
+            color: #ffffff;
+            margin-top: 2vh;
+            display: none;
+        }
+        #board.pc {
+            display: none;
+            position: relative;
+            width: 310px;
+            height: 310px;
+            background-color: #ffffff;
+            border: 2px solid #333;
+        }
+        #board.mobile {
+            display: none;
+            position: relative;
+            width: 90vw;
+            max-width: 400px;
+            aspect-ratio: 1 / 1;
+            background-color: #ffffff;
+            border: 0.5vw solid #333;
+        }
+        .fly.pc {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            transition: all 0.1s linear;
+            cursor: pointer;
+        }
+        .fly.mobile {
+            position: absolute;
+            width: 8vw;
+            height: 8vw;
+            max-width: 30px;
+            max-height: 30px;
+            transition: all 0.1s linear;
+            cursor: pointer;
+        }
+        #score-container.pc {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ffcc00;
+        }
+        #score-container.mobile {
+            position: absolute;
+            top: 2vh;
+            left: 2vw;
+            color: #ffcc00;
+        }
+        #level-title.pc {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        #level-title.mobile {
+            font-size: 5vw;
+            margin-bottom: 1vh;
+        }
+        #score.pc {
+            font-size: 20px;
+        }
+        #score.mobile {
+            font-size: 4vw;
+        }
+        #timer.pc {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 20px;
+            color: #ff4d4d;
+        }
+        #timer.mobile {
+            position: absolute;
+            top: 2vh;
+            right: 2vw;
+            font-size: 4vw;
+            color: #ff4d4d;
+        }
+        #restart-button.pc, #next-level-button.pc {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            background-color: #ff4d4d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #restart-button.mobile, #next-level-button.mobile {
+            display: none;
+            margin-top: 2vh;
+            padding: 2vw 4vw;
+            font-size: 4vw;
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            background-color: #ff4d4d;
+            border: none;
+            border-radius: 1vw;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #restart-button:hover, #next-level-button:hover {
+            background-color: #ff6666;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="score-container" class="device">
+        <div id="level-title" class="device">Nível 3</div>
+        <div id="score" class="device">Pontuação: 0</div>
+    </div>
+    <div id="timer" class="device">Tempo: 45s</div>
+    <div id="intro">
+        <h2 id="message" class="device">Breno's Fly Invasion!</h2>
+    </div>
+    <div id="board" class="device"></div>
+    <button id="restart-button" class="device">Jogar Novamente</button>
+    <button id="next-level-button" class="device">Nível 4</button>
+    <audio id="tap-sound" src="Áudio/tap.wav"></audio>
+
+    <script>
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        const deviceClass = isMobile ? 'mobile' : 'pc';
+
+        document.querySelectorAll('.device').forEach(element => {
+            element.classList.add(deviceClass);
+        });
+
+        const message = document.getElementById('message');
+        const board = document.getElementById('board');
+        const score = document.getElementById('score');
+        const timer = document.getElementById('timer');
+        const restartButton = document.getElementById('restart-button');
+        const nextLevelButton = document.getElementById('next-level-button');
+        const tapSound = document.getElementById('tap-sound');
+        let flies = [];
+        let gameActive = true;
+        let points = 0;
+        let timeLeft = 45;
+
+        if (isMobile) document.body.style.touchAction = 'none';
+
+        message.style.display = 'block';
+        setTimeout(() => {
+            board.style.display = 'block';
+            startGame();
+        }, 2000);
+
+        function startGame() {
+            spawnFly();
+            setInterval(moveFlies, 100);
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                timer.textContent = `Tempo: ${timeLeft}s`;
+                spawnMoreFlies();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    gameActive = false;
+                    alert(`Fim do jogo! Pontuação final: ${points}`);
+                    nextLevelButton.style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        function spawnFly() {
+            if (!gameActive || flies.length >= 4) return;
+            const fly = document.createElement('img');
+            fly.src = 'Imagens/mosca.png';
+            fly.classList.add('fly', deviceClass);
+            board.appendChild(fly);
+            const boardWidth = board.offsetWidth;
+            const flyWidth = fly.offsetWidth;
+            const flyHeight = fly.offsetHeight;
+            // Posição aleatória dentro do tabuleiro
+            const randomX = Math.random() * (boardWidth - flyWidth);
+            const randomY = Math.random() * (boardWidth - flyHeight); // boardWidth pois é quadrado
+            fly.style.left = `${randomX}px`;
+            fly.style.top = `${randomY}px`;
+            fly.speed = 1 + (45 - timeLeft) / 45;
+            fly.addEventListener('click', handleFlyClick);
+            if (isMobile) fly.addEventListener('touchstart', handleFlyClick);
+            flies.push(fly);
+        }
+
+        function handleFlyClick(e) {
+            e.preventDefault();
+            if (!gameActive) return;
+            const fly = e.target;
+            board.removeChild(fly);
+            flies = flies.filter(f => f !== fly);
+            points += 20;
+            score.textContent = `Pontuação: ${points}`;
+            tapSound.play();
+        }
+
+        function spawnMoreFlies() {
+            const maxFlies = Math.min(4, Math.floor((45 - timeLeft) / 15) + 1);
+            if (flies.length < maxFlies) spawnFly();
+        }
+
+        function moveFlies() {
+            const boardWidth = board.offsetWidth;
+            flies.forEach(fly => {
+                let x = parseFloat(fly.style.left);
+                let y = parseFloat(fly.style.top);
+                const speed = fly.speed;
+                x += (Math.random() - 0.5) * speed * 10;
+                y += (Math.random() - 0.5) * speed * 10;
+                x = Math.max(0, Math.min(boardWidth - fly.offsetWidth, x));
+                y = Math.max(0, Math.min(boardWidth - fly.offsetHeight, y));
+                fly.style.left = `${x}px`;
+                fly.style.top = `${y}px`;
+            });
+        }
+
+        restartButton.addEventListener('click', () => {
+            tapSound.play();
+            setTimeout(() => {
+                window.location.href = 'nivel1.html';
+            }, 200);
+        });
+
+        if (isMobile) {
+            restartButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                tapSound.play();
+                setTimeout(() => {
+                    window.location.href = 'nivel1.html';
+                }, 200);
+            });
+        }
+
+        nextLevelButton.addEventListener('click', () => {
+            tapSound.play();
+            setTimeout(() => {
+                window.location.href = 'nivel4.html';
+            }, 200);
+        });
+
+        if (isMobile) {
+            nextLevelButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                tapSound.play();
+                setTimeout(() => {
+                    window.location.href = 'nivel4.html';
+                }, 200);
+            });
+        }
+    </script>
+</body>
+</html>

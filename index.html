@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breno x the World</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            font-family: 'Orbitron', sans-serif;
+        }
+        #title {
+            text-align: center;
+        }
+        .word {
+            font-size: 60px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+        #breno { color: #ff4d4d; }
+        #vs { color: #00ccff; }
+        #the { color: #ffcc00; }
+        #world { color: #66ff66; }
+        #developer {
+            margin-top: 50px;
+            font-size: 16px;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+        #start-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            background-color: #ff4d4d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #start-button:hover {
+            background-color: #ff6666;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="title">
+        <div id="breno" class="word">Breno</div>
+        <div id="vs" class="word">Vs.</div>
+        <div id="the" class="word">the</div>
+        <div id="world" class="word">World</div>
+    </div>
+    <button id="start-button">Começar</button>
+    <div id="developer">B&B - 2025</div>
+    <audio id="click-sound" src="Áudio/Click.wav"></audio>
+
+    <script>
+        const words = [
+            document.getElementById('breno'),
+            document.getElementById('vs'),
+            document.getElementById('the'),
+            document.getElementById('world')
+        ];
+        const startButton = document.getElementById('start-button');
+        const clickSound = document.getElementById('click-sound');
+
+        let delay = 0;
+        words.forEach(word => {
+            setTimeout(() => {
+                word.style.opacity = 1;
+            }, delay);
+            delay += 500;
+        });
+
+        // Reproduz o som e redireciona ao clicar no botão
+        startButton.addEventListener('click', () => {
+            clickSound.play(); // Toca o som de clique
+            setTimeout(() => {
+                window.location.href = 'nivel1.html'; // Redireciona após o som
+            }, 200); // Atraso de 200ms para o som ser ouvido
+        });
+    </script>
+</body>
+</html>

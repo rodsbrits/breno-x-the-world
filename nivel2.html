@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breno x the World - Nível 2</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            background-color: #1a1a1a;
+            margin: 0;
+            height: 100vh;
+            justify-content: center;
+            position: relative;
+        }
+        #intro {
+            text-align: center;
+        }
+        #message {
+            font-size: 24px;
+            color: #ffffff;
+            margin-top: 20px;
+            display: none;
+        }
+        #game-canvas {
+            display: none;
+            background-color: #ffffff;
+            border: 2px solid #333;
+        }
+        #score-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ffcc00;
+        }
+        #level-title {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        #score {
+            font-size: 20px;
+        }
+        #restart-button, #next-level-button {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            background-color: #ff4d4d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #restart-button:hover, #next-level-button:hover {
+            background-color: #ff6666;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="score-container">
+        <div id="level-title">Nível 2</div>
+        <div id="score">Pontuação: 100</div>
+    </div>
+    <div id="intro">
+        <h2 id="message">Break Breno's Wall!</h2>
+    </div>
+    <canvas id="game-canvas" width="480" height="320"></canvas>
+    <button id="restart-button">Jogar Novamente</button>
+    <button id="next-level-button">Nível 3</button>
+    <audio id="click-sound" src="Áudio/Click.wav"></audio>
+    <audio id="ball-hit-sound" src="Áudio/ballhit.wav"></audio>
+    <audio id="brick-break-sound" src="Áudio/ice-breaking.wav"></audio>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const message = document.getElementById('message');
+        const score = document.getElementById('score');
+        const restartButton = document.getElementById('restart-button');
+        const nextLevelButton = document.getElementById('next-level-button');
+        const clickSound = document.getElementById('click-sound');
+        const ballHitSound = document.getElementById('ball-hit-sound');
+        const brickBreakSound = document.getElementById('brick-break-sound');
+
+        let paddleX = (canvas.width - 75) / 2;
+        const paddleHeight = 10;
+        const paddleWidth = 75;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height - 30;
+        let ballDX = 2.3; // Aumentado 15% (de 2 para 2.3)
+        let ballDY = -2.3; // Aumentado 15% (de -2 para -2.3)
+        const ballRadius = 10;
+        const brickRowCount = 3;
+        const brickColumnCount = 5;
+        const brickWidth = 75;
+        const brickHeight = 20;
+        const brickPadding = 10;
+        const brickOffsetTop = 30;
+        const brickOffsetLeft = 30;
+        let bricks = [];
+        let gameActive = true;
+        let points = 100; // Começa com os 100 do nível 1
+
+        for (let c = 0; c < brickColumnCount; c++) {
+            bricks[c] = [];
+            for (let r = 0; r < brickRowCount; r++) {
+                bricks[c][r] = { x: 0, y: 0, status: 1 };
+            }
+        }
+
+        message.style.display = 'block';
+        setTimeout(() => {
+            canvas.style.display = 'block';
+            draw();
+        }, 2000);
+
+        function draw() {
+            if (!gameActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPaddle();
+            drawBall();
+            drawBricks();
+            collisionDetection();
+            moveBall();
+            requestAnimationFrame(draw);
+        }
+
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
+            ctx.fillStyle = '#ff4d4d';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = '#00ccff';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawBricks() {
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    if (bricks[c][r].status === 1) {
+                        const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+                        const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+                        bricks[c][r].x = brickX;
+                        bricks[c][r].y = brickY;
+                        ctx.beginPath();
+                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                        ctx.fillStyle = '#66ff66'; // Verde vibrante, sem imagem
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+            }
+        }
+
+        function moveBall() {
+            ballX += ballDX;
+            ballY += ballDY;
+
+            if (ballX + ballDX > canvas.width - ballRadius || ballX + ballDX < ballRadius) {
+                ballDX = -ballDX;
+            }
+            if (ballY + ballDY < ballRadius) {
+                ballDY = -ballDY;
+            } else if (ballY + ballDY > canvas.height - ballRadius) {
+                if (ballX > paddleX && ballX < paddleX + paddleWidth) {
+                    ballDY = -ballDY;
+                    ballHitSound.play(); // Som ao acertar a barra
+                } else {
+                    gameActive = false;
+                    canvas.style.opacity = '0.3';
+                    restartButton.style.display = 'block';
+                    alert('Breno venceu!');
+                }
+            }
+        }
+
+        function collisionDetection() {
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    const b = bricks[c][r];
+                    if (b.status === 1) {
+                        if (ballX > b.x && ballX < b.x + brickWidth && ballY > b.y && ballY < b.y + brickHeight) {
+                            ballDY = -ballDY;
+                            b.status = 0;
+                            points += 20; // Cada bloco vale 20 pontos
+                            score.textContent = `Pontuação: ${points}`;
+                            brickBreakSound.play(); // Som ao quebrar tijolo
+                            if (bricks.every(col => col.every(brick => brick.status === 0))) {
+                                gameActive = false;
+                                alert('Você venceu!');
+                                nextLevelButton.style.display = 'block';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            const relativeX = e.clientX - canvas.offsetLeft;
+            if (relativeX > 0 && relativeX < canvas.width) {
+                paddleX = relativeX - paddleWidth / 2;
+                if (paddleX < 0) paddleX = 0;
+                if (paddleX + paddleWidth > canvas.width) paddleX = canvas.width - paddleWidth;
+            }
+        });
+
+        restartButton.addEventListener('click', () => {
+            clickSound.play();
+            setTimeout(() => {
+                window.location.href = 'nivel1.html'; // Redireciona para o nível 1
+            }, 200);
+        });
+
+        nextLevelButton.addEventListener('click', () => {
+            clickSound.play();
+            setTimeout(() => {
+                window.location.href = 'nivel3.html';
+            }, 200);
+        });
+
+        function resetGame() {
+            paddleX = (canvas.width - 75) / 2;
+            ballX = canvas.width / 2;
+            ballY = canvas.height - 30;
+            ballDX = 2.3;
+            ballDY = -2.3;
+            for (let c = 0; c < brickColumnCount; c++) {
+                for (let r = 0; r < brickRowCount; r++) {
+                    bricks[c][r].status = 1;
+                }
+            }
+            canvas.style.opacity = '1';
+            restartButton.style.display = 'none';
+            nextLevelButton.style.display = 'none';
+            gameActive = true;
+            draw();
+        }
+    </script>
+</body>
+</html>
