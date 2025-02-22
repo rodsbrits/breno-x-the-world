@@ -36,7 +36,7 @@
             background-color: #ffffff;
             border: 2px solid #333;
             width: 480px;
-            height: 384px; /* Aumentado de 320px */
+            height: 384px;
             transition: opacity 0.5s ease;
         }
         #game-canvas.mobile {
@@ -45,7 +45,7 @@
             border: 0.5vw solid #333;
             width: 90vw;
             max-width: 480px;
-            height: 72vw; /* Aumentado de 60vw */
+            height: 72vw;
             max-height: 384px;
             transition: opacity 0.5s ease;
         }
@@ -95,7 +95,7 @@
             color: #ffcc00;
             font-size: 7vw;
         }
-        #restart-button.pc, #next-level-button.pc {
+        #restart-button.pc, #new-game-button.pc, #next-level-button.pc {
             display: none;
             margin-top: 20px;
             padding: 10px 20px;
@@ -108,7 +108,7 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        #restart-button.mobile, #next-level-button.mobile {
+        #restart-button.mobile, #new-game-button.mobile, #next-level-button.mobile {
             display: none;
             margin-top: 2vh;
             padding: 2vw 4vw;
@@ -121,7 +121,7 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        #restart-button:hover, #next-level-button:hover {
+        #restart-button:hover, #new-game-button:hover, #next-level-button:hover {
             background-color: #ff6666;
         }
     </style>
@@ -138,9 +138,10 @@
     <canvas id="game-canvas" class="device"></canvas>
     <div id="game-over" class="device">
         <div id="final-score"></div>
-        <button id="restart-button" class="device">Jogar Novamente</button>
+        <button id="restart-button" class="device">Repetir</button>
+        <button id="new-game-button" class="device">Novo Jogo</button>
+        <button id="next-level-button" class="device">Nível 3</button>
     </div>
-    <button id="next-level-button" class="device">Nível 3</button>
     <audio id="click-sound" src="Áudio/Click.wav"></audio>
     <audio id="ball-hit-sound" src="Áudio/ballhit.wav"></audio>
     <audio id="brick-break-sound" src="Áudio/ice-breaking.wav"></audio>
@@ -156,12 +157,13 @@
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = isMobile ? Math.min(window.innerWidth * 0.9, 480) : 480;
-        canvas.height = isMobile ? Math.min(window.innerHeight * 0.72, 384) : 384; // Ajustado para 20% maior
+        canvas.height = isMobile ? Math.min(window.innerHeight * 0.72, 384) : 384;
         const message = document.getElementById('message');
         const score = document.getElementById('score');
         const gameOver = document.getElementById('game-over');
         const finalScore = document.getElementById('final-score');
         const restartButton = document.getElementById('restart-button');
+        const newGameButton = document.getElementById('new-game-button');
         const nextLevelButton = document.getElementById('next-level-button');
         const clickSound = document.getElementById('click-sound');
         const ballHitSound = document.getElementById('ball-hit-sound');
@@ -172,8 +174,9 @@
         const paddleWidth = 75;
         let ballX = canvas.width / 2;
         let ballY = canvas.height - 30;
-        let ballDX = 3.4; // Aumentado de 2.8 para 3.4 (20%)
-        let ballDY = -3.4; // Aumentado de -2.8 para -3.4 (20%)
+        let ballDX = 3.4;
+        let ballDY = -3.4;
+        const initialBallSpeed = 3.4;
         const ballRadius = 10;
         const brickRowCount = 3;
         const brickColumnCount = 5;
@@ -184,7 +187,7 @@
         const brickOffsetLeft = 30;
         let bricks = [];
         let gameActive = true;
-        let points = 100; // Inicia zerado, sem carregar do nível anterior
+        let points = 100;
 
         const brickColors = ['#ff4d4d', '#00ccff', '#ffcc00', '#cc00ff'];
 
@@ -192,8 +195,8 @@
             paddleX = (canvas.width - 75) / 2;
             ballX = canvas.width / 2;
             ballY = canvas.height - 30;
-            ballDX = 3.4;
-            ballDY = -3.4;
+            ballDX = initialBallSpeed;
+            ballDY = -initialBallSpeed;
             bricks = [];
             for (let c = 0; c < brickColumnCount; c++) {
                 bricks[c] = [];
@@ -202,10 +205,11 @@
                 }
             }
             gameActive = true;
-            points = 100; // Reinicia a pontuação
+            points = 100;
             score.textContent = `Pontuação: ${points}`;
             gameOver.style.display = 'none';
             restartButton.style.display = 'none';
+            newGameButton.style.display = 'none';
             nextLevelButton.style.display = 'none';
             canvas.style.opacity = '1';
             draw();
@@ -285,14 +289,16 @@
                     const hitPosition = (ballX - paddleX) / paddleWidth;
                     const maxAngle = 2;
                     ballDX = maxAngle * (2 * hitPosition - 1);
-                    ballDY = -Math.abs(ballDY);
+                    ballDY = -initialBallSpeed;
                     ballHitSound.play();
                 } else {
                     gameActive = false;
                     canvas.style.opacity = '0.3';
+                    finalScore.textContent = `Você perdeu! Pontuação Final: ${points}`;
                     gameOver.style.display = 'block';
-                    finalScore.textContent = `Pontuação Final: ${points}`;
                     restartButton.style.display = 'block';
+                    newGameButton.style.display = 'block';
+                    nextLevelButton.style.display = 'block';
                 }
             }
         }
@@ -310,6 +316,10 @@
                             brickBreakSound.play();
                             if (bricks.every(col => col.every(brick => brick.status === 0))) {
                                 gameActive = false;
+                                finalScore.textContent = `Você venceu! Pontuação: ${points}`;
+                                gameOver.style.display = 'block';
+                                restartButton.style.display = 'block';
+                                newGameButton.style.display = 'block';
                                 nextLevelButton.style.display = 'block';
                             }
                         }
@@ -353,7 +363,14 @@
 
         restartButton.addEventListener('click', () => {
             clickSound.play();
-            resetGame(); // Reinicia o nível 2
+            resetGame();
+        });
+
+        newGameButton.addEventListener('click', () => {
+            clickSound.play();
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 200);
         });
 
         nextLevelButton.addEventListener('click', () => {
@@ -367,7 +384,14 @@
             restartButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 clickSound.play();
-                resetGame(); // Reinicia o nível 2
+                resetGame();
+            });
+            newGameButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                clickSound.play();
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 200);
             });
             nextLevelButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();

@@ -127,7 +127,7 @@
             color: #ffcc00;
             font-size: 7vw;
         }
-        #restart-button.pc, #next-level-button.pc {
+        #restart-button.pc, #new-game-button.pc, #next-level-button.pc {
             display: none;
             margin-top: 20px;
             padding: 10px 20px;
@@ -140,7 +140,7 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        #restart-button.mobile, #next-level-button.mobile {
+        #restart-button.mobile, #new-game-button.mobile, #next-level-button.mobile {
             display: none;
             margin-top: 2vh;
             padding: 2vw 4vw;
@@ -153,7 +153,7 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        #restart-button:hover, #next-level-button:hover {
+        #restart-button:hover, #new-game-button:hover, #next-level-button:hover {
             background-color: #ff6666;
         }
     </style>
@@ -171,9 +171,10 @@
     <div id="board" class="device"></div>
     <div id="game-over" class="device">
         <div id="final-score"></div>
-        <button id="restart-button" class="device">Jogar Novamente</button>
+        <button id="restart-button" class="device">Repetir</button>
+        <button id="new-game-button" class="device">Novo Jogo</button>
+        <button id="next-level-button" class="device">Nível 4</button>
     </div>
-    <button id="next-level-button" class="device">Nível 4</button>
     <audio id="tap-sound" src="Áudio/tap.wav" preload="auto"></audio>
 
     <script>
@@ -191,10 +192,11 @@
         const gameOver = document.getElementById('game-over');
         const finalScore = document.getElementById('final-score');
         const restartButton = document.getElementById('restart-button');
+        const newGameButton = document.getElementById('new-game-button');
         const nextLevelButton = document.getElementById('next-level-button');
         let flies = [];
         let gameActive = true;
-        let points = 0; // Inicia zerado
+        let points = 0;
         let timeLeft = 45;
 
         function playTapSound() {
@@ -223,8 +225,10 @@
                     clearInterval(timerInterval);
                     gameActive = false;
                     board.style.opacity = '0.3';
+                    finalScore.textContent = `Tempo esgotado! Pontuação Final: ${points}`;
                     gameOver.style.display = 'block';
-                    finalScore.textContent = `Pontuação Final: ${points}`;
+                    restartButton.style.display = 'block';
+                    newGameButton.style.display = 'block';
                     nextLevelButton.style.display = 'block';
                 }
             }, 1000);
@@ -240,6 +244,7 @@
             timer.textContent = `Tempo: ${timeLeft}s`;
             gameOver.style.display = 'none';
             restartButton.style.display = 'none';
+            newGameButton.style.display = 'none';
             nextLevelButton.style.display = 'none';
             board.style.opacity = '1';
             startGame();
@@ -306,7 +311,14 @@
 
         restartButton.addEventListener('click', () => {
             playTapSound();
-            resetGame(); // Reinicia o nível 3
+            resetGame();
+        });
+
+        newGameButton.addEventListener('click', () => {
+            playTapSound();
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 200);
         });
 
         nextLevelButton.addEventListener('click', () => {
@@ -320,7 +332,14 @@
             restartButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 playTapSound();
-                resetGame(); // Reinicia o nível 3
+                resetGame();
+            });
+            newGameButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                playTapSound();
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 200);
             });
             nextLevelButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();

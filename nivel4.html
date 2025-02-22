@@ -42,8 +42,8 @@
         }
         #game-canvas.mobile {
             display: none;
-            width: 50vw; /* Limitado a 50% da tela */
-            height: 60vh; /* 60% da altura para deixar 20%+ livre */
+            width: 50vw;
+            height: 60vh;
             background-color: #ffffff;
             border: 0.5vw solid #333;
             transition: opacity 0.5s ease;
@@ -94,7 +94,8 @@
             color: #ffcc00;
             font-size: 7vw;
         }
-        #restart-button.pc {
+        #restart-button.pc, #new-game-button.pc {
+            display: none;
             margin-top: 20px;
             padding: 10px 20px;
             font-size: 18px;
@@ -105,11 +106,11 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            display: block;
             margin-left: auto;
             margin-right: auto;
         }
-        #restart-button.mobile {
+        #restart-button.mobile, #new-game-button.mobile {
+            display: none;
             margin-top: 2vh;
             padding: 2vw 4vw;
             font-size: 4vw;
@@ -120,11 +121,10 @@
             border-radius: 1vw;
             cursor: pointer;
             transition: background-color 0.3s ease;
-            display: block;
             margin-left: auto;
             margin-right: auto;
         }
-        #restart-button:hover {
+        #restart-button:hover, #new-game-button:hover {
             background-color: #ff6666;
         }
     </style>
@@ -141,7 +141,8 @@
     <canvas id="game-canvas" class="device"></canvas>
     <div id="game-over" class="device">
         <div id="final-score"></div>
-        <button id="restart-button" class="device">Jogar Novamente</button>
+        <button id="restart-button" class="device">Repetir</button>
+        <button id="new-game-button" class="device">Novo Jogo</button>
     </div>
     <audio id="jump-sound" src="Áudio/jump.wav"></audio>
     <audio id="car-sound" src="Áudio/car.wav"></audio>
@@ -156,13 +157,14 @@
 
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = isMobile ? window.innerWidth * 0.5 : 300; // 50% da largura no mobile
+        canvas.width = isMobile ? window.innerWidth * 0.5 : 300;
         canvas.height = isMobile ? window.innerHeight * 0.6 : 600;
         const message = document.getElementById('message');
         const score = document.getElementById('score');
         const gameOver = document.getElementById('game-over');
         const finalScore = document.getElementById('final-score');
         const restartButton = document.getElementById('restart-button');
+        const newGameButton = document.getElementById('new-game-button');
         const jumpSound = document.getElementById('jump-sound');
         const carSound = document.getElementById('car-sound');
 
@@ -172,7 +174,7 @@
         let obstacles = [];
         let gameSpeed = 2;
         let spawnInterval = 4500;
-        let points = 0; // Inicia zerado
+        let points = 0;
         let gameActive = true;
         let obstaclesPassed = 0;
 
@@ -211,6 +213,7 @@
             score.textContent = `Pontuação: ${points}`;
             gameOver.style.display = 'none';
             restartButton.style.display = 'none';
+            newGameButton.style.display = 'none';
             canvas.style.opacity = '1';
             startGame();
         }
@@ -219,20 +222,21 @@
             if (!gameActive) return;
             const obstacleWidth = playerWidth;
             const obstacleHeight = playerHeight;
-            const minGap = playerHeight * 1.1; // 110% da altura do personagem
+            const minGapVertical = playerHeight * 1.1;
+            const minGapHorizontal = playerWidth * 1.2;
 
-            // Verifica se há espaço suficiente entre obstáculos
-            const canSpawn = obstacles.every(obstacle => 
-                obstacle.y + obstacle.height + minGap < canvas.height || obstacle.y > canvas.height
+            const canSpawnVertical = obstacles.every(obstacle => 
+                obstacle.y + obstacle.height + minGapVertical < canvas.height || obstacle.y > canvas.height
             );
 
-            if (!canSpawn) {
+            if (!canSpawnVertical) {
                 setTimeout(spawnObstacles, 100);
                 return;
             }
 
             let newX;
             let overlap;
+            let minDistanceMet;
             do {
                 newX = Math.random() * (canvas.width - obstacleWidth);
                 overlap = obstacles.some(obstacle =>
@@ -240,7 +244,10 @@
                     newX + obstacleWidth > obstacle.x &&
                     obstacle.y < obstacleHeight
                 );
-            } while (overlap);
+                minDistanceMet = obstacles.every(obstacle => 
+                    Math.abs(newX - obstacle.x) >= minGapHorizontal || obstacle.y > canvas.height
+                );
+            } while (overlap || !minDistanceMet);
 
             const obstacle = {
                 x: newX,
@@ -282,9 +289,10 @@
                 ) {
                     gameActive = false;
                     canvas.style.opacity = '0.3';
+                    finalScore.textContent = `Você perdeu! Pontuação Final: ${points}`;
                     gameOver.style.display = 'block';
-                    finalScore.textContent = `Pontuação Final: ${points}`;
                     restartButton.style.display = 'block';
+                    newGameButton.style.display = 'block';
                 }
             });
 
@@ -328,14 +336,28 @@
 
         restartButton.addEventListener('click', () => {
             jumpSound.play();
-            resetGame(); // Reinicia o nível 4
+            resetGame();
+        });
+
+        newGameButton.addEventListener('click', () => {
+            jumpSound.play();
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 200);
         });
 
         if (isMobile) {
             restartButton.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 jumpSound.play();
-                resetGame(); // Reinicia o nível 4
+                resetGame();
+            });
+            newGameButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                jumpSound.play();
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 200);
             });
         }
     </script>
