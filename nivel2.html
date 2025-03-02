@@ -199,8 +199,10 @@
             paddleX = (canvas.width - 75) / 2;
             ballX = canvas.width / 2;
             ballY = canvas.height - 30;
-            ballDX = initialBallSpeed; // Mantém velocidade constante de 5
-            ballDY = -initialBallSpeed; // Mantém velocidade constante de 5
+            // Define a direção inicial da bola para manter a magnitude em 5
+            const angle = Math.PI / 4; // Ângulo inicial de 45 graus
+            ballDX = initialBallSpeed * Math.cos(angle);
+            ballDY = -initialBallSpeed * Math.sin(angle);
             bricks = [];
             for (let c = 0; c < brickColumnCount; c++) {
                 bricks[c] = [];
@@ -285,17 +287,17 @@
             ballY += ballDY;
 
             if (ballX + ballDX > canvas.width - ballRadius || ballX + ballDX < ballRadius) {
-                ballDX = -ballDX; // Mantém magnitude em 5
+                ballDX = -ballDX; // Inverte a direção horizontal, mantendo magnitude
             }
             if (ballY + ballDY < ballRadius) {
-                ballDY = -ballDY; // Mantém magnitude em 5
+                ballDY = -ballDY; // Inverte a direção vertical, mantendo magnitude
             } else if (ballY + ballDY > canvas.height - ballRadius) {
                 if (ballX > paddleX && ballX < paddleX + paddleWidth) {
-                    const hitPosition = (ballX - paddleX) / paddleWidth;
-                    const maxAngle = 2;
-                    const angle = maxAngle * (2 * hitPosition - 1);
-                    ballDX = initialBallSpeed * Math.sin(angle); // Mantém magnitude em 5
-                    ballDY = -initialBallSpeed * Math.cos(angle); // Mantém magnitude em 5
+                    const hitPosition = (ballX - (paddleX + paddleWidth / 2)) / (paddleWidth / 2); // Posição normalizada [-1, 1]
+                    const maxAngle = Math.PI / 3; // Ângulo máximo de 60 graus
+                    const angle = hitPosition * maxAngle; // Ângulo baseado na posição de colisão
+                    ballDX = initialBallSpeed * Math.sin(angle); // Nova direção horizontal
+                    ballDY = -initialBallSpeed * Math.cos(angle); // Nova direção vertical (para cima)
                     ballHitSound.play();
                 } else {
                     gameActive = false;
@@ -316,7 +318,11 @@
                     const b = bricks[c][r];
                     if (b.status === 1) {
                         if (ballX > b.x && ballX < b.x + brickWidth && ballY > b.y && ballY < b.y + brickHeight) {
-                            ballDY = -ballDY; // Mantém magnitude em 5
+                            ballDY = -ballDY; // Inverte a direção vertical
+                            // Recalcula ballDX para manter a magnitude em 5
+                            const angle = Math.atan2(ballDX, -ballDY); // Calcula o novo ângulo
+                            ballDX = initialBallSpeed * Math.sin(angle);
+                            ballDY = -initialBallSpeed * Math.cos(angle);
                             b.status = 0;
                             points += 20;
                             score.textContent = `Pontuação: ${points}`;

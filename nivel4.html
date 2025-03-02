@@ -36,7 +36,6 @@
             display: none;
             width: 300px;
             height: 600px;
-            background-color: #ffffff;
             border: 2px solid #333;
             transition: opacity 0.5s ease;
         }
@@ -44,7 +43,6 @@
             display: none;
             width: 50vw;
             height: 60vh;
-            background-color: #ffffff;
             border: 0.5vw solid #333;
             transition: opacity 0.5s ease;
         }
@@ -168,6 +166,9 @@
         const jumpSound = document.getElementById('jump-sound');
         const carSound = document.getElementById('car-sound');
 
+        const roadImage = new Image();
+        roadImage.src = 'Imagens/estrada.jpg'; // Imagem de estrada para o fundo
+
         const playerWidth = canvas.width / 6;
         const playerHeight = playerWidth * 1.5;
         let player = { x: canvas.width / 2 - playerWidth / 2, y: canvas.height - playerHeight - 10, width: playerWidth, height: playerHeight };
@@ -191,7 +192,7 @@
 
         score.textContent = `Pontuação: ${points}`;
         message.style.display = 'block';
-        Promise.all([playerImage, ...obstacleImages].map(img => new Promise(resolve => img.onload = resolve))).then(() => {
+        Promise.all([roadImage, playerImage, ...obstacleImages].map(img => new Promise(resolve => img.onload = resolve))).then(() => {
             setTimeout(() => {
                 canvas.style.display = 'block';
                 message.style.display = 'block';
@@ -267,6 +268,9 @@
         function gameLoop() {
             if (!gameActive) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Desenha a imagem de estrada como fundo
+            ctx.drawImage(roadImage, 0, 0, canvas.width, canvas.height);
 
             // Aumenta a velocidade em 15% a cada 500 pontos
             gameSpeed = 3 * (1 + Math.floor(points / 500) * 0.15);
